@@ -3,6 +3,9 @@ import json
 import networkx as nx
 import numpy as np
 from collections import Counter
+import urllib
+from datetime import datetime
+import re
 
 # Only for cleanup of notebook 
 # Don't code like this :)
@@ -84,3 +87,40 @@ def create_df_G_from_path(path: str):
         G.nodes[actor]['movies']=actor_movies_list[actor]
         
     return df, G
+
+def look_up_decade(year: int)-> str:
+    decade_start=int(year/10)*10
+    query = '%s%s&%s&%s&%s' % (baseurl,action,f'titles={decade_start}s',content,dataformat)
+    res = json.loads(urllib.request.urlopen(query).read().decode('utf-8'))
+    pages = res.get('query').get('pages')
+    if not pages:
+        raise Exception('No pages found')
+    data = []
+    for page in pages.keys():
+        try:
+            data.append(res['query']['pages'][page]['revisions'][0]['*'])
+        except:
+            print(f"Failed on pages{page}")
+    return data
+
+def process_data(d:list, limit=3)->list:
+    data_string = ''
+    temp_str = ''
+    
+    i=0
+    for x in d:
+        if i>=limit:
+            break
+        # Remove special chars and data in links
+        temp_str=re.sub("[\{\<.*?[\}\>]", "", x)
+        # Remove links
+        temp_str=re.sub('url=.\S*','',temp_str)
+        # Weird chars
+        temp_str=re.sub('[^a-zA-Z0-9 \n\.]', '', temp_str)
+        # Remaning links
+        temp_str=re.sub('http.\S*','',re.sub('[^a-zA-Z0-9 \n\.]', '', temp_str))
+        # Remaning links
+        temp_str=re.sub('redirect.\S*','',temp_str)
+        data_string += temp_str
+        i+=1
+    return data_string    
