@@ -89,6 +89,11 @@ def create_df_G_from_path(path: str):
     return df, G
 
 def look_up_decade(year: int)-> str:
+    baseurl = 'https://en.wikipedia.org/w/api.php?'
+    action = 'action=query'
+    title = 'titles='
+    content = 'prop=revisions&rvprop=content'
+    dataformat = 'format=json'
     decade_start=int(year/10)*10
     query = '%s%s&%s&%s&%s' % (baseurl,action,f'titles={decade_start}s',content,dataformat)
     res = json.loads(urllib.request.urlopen(query).read().decode('utf-8'))
