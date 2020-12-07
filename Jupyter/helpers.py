@@ -19,7 +19,7 @@ def create_df_G_from_path(path: str):
 
 
     #Convert JSON to dict and extract the names of each actor in each movie
-    actors_per_movie = df['cast'].apply(lambda x: ','.join([y['name'] for y in json.loads(x)])).str.split(',', expand = True).fillna('')
+    actors_per_movie = df['cast'].apply(lambda x: '|'.join([y['name'] for y in json.loads(x)])).str.split('|', expand = True).fillna('')
     actors_per_movie = df[['original_title', 'id']].merge(right = actors_per_movie, left_index = True, right_index = True)
 
     #Unpivot
